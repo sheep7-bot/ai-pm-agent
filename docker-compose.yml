@@ -1,0 +1,20 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ai-pm-agent:latest
+    container_name: ai-pm-agent
+    ports:
+      - "8000:8000"
+    environment:
+      # 密钥从宿主机环境变量透传（不写进镜像）：
+      #   Windows: setx OPENCODE_GO_API_KEY "sk-xxxx" 然后重开终端
+      OPENCODE_GO_API_KEY: ${OPENCODE_GO_API_KEY:-}
+      TAVILY_API_KEY: ${TAVILY_API_KEY:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://opencode.ai/inference/go/v1}
+      LLM_MODEL: ${LLM_MODEL:-deepseek-v4.1-flash}
+    volumes:
+      # SQLite 数据持久化：容器重建不丢会话与 PRD 版本
+      - ./data:/app/data
+    restart: unless-stopped
